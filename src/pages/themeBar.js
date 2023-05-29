@@ -15,10 +15,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Grid from '@mui/material/Grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-// import { Routes, Route } from 'react-router-dom';
-// import Dashboard from './Dashboard';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import CurrencyExchangeSharpIcon from '@mui/icons-material/CurrencyExchangeSharp';
+import PaymentsSharpIcon from '@mui/icons-material/PaymentsSharp';
 import Router from '../routes';
 
 const drawerWidth = 240;
@@ -69,9 +68,6 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 const mdTheme = createTheme({
-  // typography: {
-  //   fontFamily: ['Chilanka', 'cursive'].join(','),
-  // },
   palette: {
     primary: {
       light: '#9ffcc980',
@@ -166,6 +162,16 @@ function Themebar() {
                 <CurrencyExchangeSharpIcon />
               </ListItemIcon>
               <ListItemText primary="Create Fund" />
+            </ListItemButton>
+            <ListItemButton
+              to="/auctions"
+              component={Link}
+              role="button"
+              selected={location.pathname === '/auctions'}>
+              <ListItemIcon>
+                <PaymentsSharpIcon />
+              </ListItemIcon>
+              <ListItemText primary="Auctions" />
             </ListItemButton>
           </List>
         </Drawer>

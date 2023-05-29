@@ -23,3 +23,18 @@ export const createDashboardService = (data) =>
     .post(`/fund/create`, data)
     .then((response) => response.data)
     .catch(handleResponse);
+export const createMemberService = (data) =>
+  axiosConfig
+    .post(`/fund/add-member`, data)
+    .then((response) => response.data)
+    .catch(handleResponse);
+export const approveMemberService = (data) =>
+  axiosConfig
+    .post(`/fund/approve`, data)
+    .then((response) => response.data)
+    .catch(handleResponse);
+export const fetchAuctionService = (data) =>
+  axiosConfig
+    .get(`/fund/auction/list`, data)
+    .then((response) => response.data)
+    .catch(handleResponse);

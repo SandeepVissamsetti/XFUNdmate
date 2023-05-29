@@ -4,7 +4,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { showMessage } from './messageSlice';
 import { startLoading3, clearLoading3, clearLoading1, startLoading1 } from './loaderSlice';
-import { fetchDashboardService, createDashboardService } from '../services/createFundservice';
+import {
+  fetchDashboardService,
+  createDashboardService,
+  createMemberService,
+  approveMemberService
+} from '../services/createFundservice';
 
 export const getdashboardList = createAsyncThunk(
   'dashboard/getdashboardList',
@@ -44,7 +49,6 @@ export const createDashboardList = createAsyncThunk(
     dispatch(startLoading1());
     try {
       const response = await createDashboardService(data);
-      console.log(response, 'response');
       if (response?.status) {
         dispatch(clearLoading1());
         dispatch(
@@ -74,10 +78,89 @@ export const createDashboardList = createAsyncThunk(
     }
   }
 );
+export const createMemberList = createAsyncThunk(
+  'dashboardlist/createMemberList',
+  async (data, { dispatch, getState }) => {
+    const state = getState();
+    const { memberList } = state.dashboard;
+    const { dashboardCount } = state.dashboard;
+
+    dispatch(startLoading1());
+    try {
+      const response = await createMemberService(data);
+      if (response?.status) {
+        dispatch(clearLoading1());
+        dispatch(
+          showMessage({
+            message: 'Member Created',
+            variant: 'success'
+          })
+        );
+        return {
+          List: [...memberList, { ...response.member }],
+          count: Number(dashboardCount) + 1,
+          response
+        };
+      }
+      dispatch(clearLoading1());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: memberList, count: 0, response };
+    } catch (error) {
+      dispatch(clearLoading1());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: memberList, count: 0, response: { status: false } };
+    }
+  }
+);
+export const createApproveMemberList = createAsyncThunk(
+  'dashboardlist/createApproveMemberList',
+  async (data, { dispatch, getState }) => {
+    const state = getState();
+    const { dashboardList } = state.dashboard;
+    const { dashboardCount } = state.dashboard;
+
+    dispatch(startLoading1());
+    try {
+      const response = await approveMemberService(data);
+      if (response?.status) {
+        dispatch(clearLoading1());
+        dispatch(
+          showMessage({
+            message: 'Create Fund Approved',
+            variant: 'success'
+          })
+        );
+        return {
+          List: [{ ...response }, ...dashboardList],
+          count: Number(dashboardCount) + 1,
+          response
+        };
+      }
+      dispatch(clearLoading1());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: dashboardList, count: 0, response };
+    } catch (error) {
+      dispatch(clearLoading1());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: dashboardList, count: 0, response: { status: false } };
+    }
+  }
+);
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: {
     dashboardList: [],
+    memberList: [],
     Count: 0
   },
   reducers: {},
@@ -91,6 +174,15 @@ const dashboardSlice = createSlice({
       ...state,
       dashboardList: action.payload.List,
       Count: action.payload.count
+    }),
+    [createMemberList.fulfilled]: (state, action) => ({
+      ...state,
+      memberList: action.payload.List,
+      Count: action.payload.count
+    }),
+    [createApproveMemberList.fulfilled]: (state, action) => ({
+      ...state,
+      dashboardList: action.payload.List
     })
   }
 });
