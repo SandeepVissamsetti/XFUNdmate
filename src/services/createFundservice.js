@@ -38,3 +38,18 @@ export const fetchAuctionService = (data) =>
     .get(`/fund/auction/list`, data)
     .then((response) => response.data)
     .catch(handleResponse);
+export const fundApprovedMenuService = (data) =>
+  axiosConfig
+    .get(`/fund/approved/menu`, data)
+    .then((response) => response.data)
+    .catch(handleResponse);
+export const createAccountMemberService = (data) =>
+  axiosConfig
+    .post(`/xrpl/create-account`, data)
+    .then((response) => response.data)
+    .catch(handleResponse);
+export const getMembersService = (data) =>
+  axiosConfig
+    .post(`/fund/members/menu/${data}`)
+    .then((response) => response.data)
+    .catch(handleResponse);

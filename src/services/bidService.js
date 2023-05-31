@@ -13,18 +13,23 @@ const handleResponse = (error) => {
   return error.response && error.response.data;
 };
 
-export const getAuctionsService = (data) =>
+export const getMemberMenuService = (data) =>
   axiosConfig
-    .get(`/fund/auction/list`, data)
+    .get(`/fund/members/menu/${data}`)
     .then((response) => response.data)
     .catch(handleResponse);
-export const createFundService = (data) =>
+export const getAuctionMenuListService = (data) =>
   axiosConfig
-    .post(`/fund/auction/start`, data)
+    .get(`/fund/auction/menu/${data}`)
     .then((response) => response.data)
     .catch(handleResponse);
-export const getAuctionsMenuService = (data) =>
+export const createBidService = (data) =>
   axiosConfig
-    .get(`/fund/approved/menu`, data)
+    .post(`/fund/auction/bid`, data)
     .then((response) => response.data)
     .catch(handleResponse);
+// export const getAuctionsMenuService = (data) =>
+//   axiosConfig
+//     .get(`/fund/approved/menu`, data)
+//     .then((response) => response.data)
+//     .catch(handleResponse);

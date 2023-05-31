@@ -8,7 +8,10 @@ import {
   fetchDashboardService,
   createDashboardService,
   createMemberService,
-  approveMemberService
+  approveMemberService,
+  fundApprovedMenuService,
+  createAccountMemberService,
+  getMembersService
 } from '../services/createFundservice';
 
 export const getdashboardList = createAsyncThunk(
@@ -70,11 +73,11 @@ export const createDashboardList = createAsyncThunk(
       } else {
         response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
       }
-      return { List: dashboardlist, count: 0, response };
+      return { List: dashboardList, count: 0, response };
     } catch (error) {
       dispatch(clearLoading1());
       error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
-      return { List: dashboardlist, count: 0, response: { status: false } };
+      return { List: dashboardList, count: 0, response: { status: false } };
     }
   }
 );
@@ -97,7 +100,7 @@ export const createMemberList = createAsyncThunk(
           })
         );
         return {
-          List: [...memberList, { ...response.member }],
+          List: [{ ...response.member }, ...memberList],
           count: Number(dashboardCount) + 1,
           response
         };
@@ -156,11 +159,94 @@ export const createApproveMemberList = createAsyncThunk(
     }
   }
 );
+export const getApprovedMenuList = createAsyncThunk(
+  'dashboard/getApprovedMenuList',
+  async (data, { dispatch }) => {
+    dispatch(startLoading3());
+    try {
+      const response = await fundApprovedMenuService(data);
+      if (response.status) {
+        dispatch(clearLoading3());
+        return { List: response.chit_funds };
+      }
+      dispatch(clearLoading3());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: [] };
+    } catch (error) {
+      dispatch(clearLoading3());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: [] };
+    }
+  }
+);
+export const getCreateAccount = createAsyncThunk(
+  'dashboard/getCreateAccount',
+  async (data, { dispatch }) => {
+    dispatch(startLoading3());
+    try {
+      const response = await createAccountMemberService(data);
+      console.log(response, 'Account created successfully');
+      if (response.status) {
+        dispatch(clearLoading3());
+        return { List: response.account };
+      }
+      dispatch(clearLoading3());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: [] };
+    } catch (error) {
+      dispatch(clearLoading3());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: [] };
+    }
+  }
+);
+export const getMembers = createAsyncThunk(
+  'dashboard/getMembers',
+  async (data, { dispatch, getState }) => {
+    const state = getState();
+    const { Count, members } = state.dashboard.members;
+
+    dispatch(startLoading3());
+    try {
+      const response = await getMembersService(data);
+      console.log(response);
+      if (response.status) {
+        dispatch(clearLoading3());
+        return { List: response, count: response.length };
+      }
+      dispatch(clearLoading3());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: members, count: Count };
+    } catch (error) {
+      dispatch(clearLoading3());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: members, count: Count };
+    }
+  }
+);
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: {
     dashboardList: [],
     memberList: [],
+    approvedList: [],
+    craeteAccount: [],
+    members: [],
     Count: 0
   },
   reducers: {},
@@ -183,6 +269,18 @@ const dashboardSlice = createSlice({
     [createApproveMemberList.fulfilled]: (state, action) => ({
       ...state,
       dashboardList: action.payload.List
+    }),
+    [getApprovedMenuList.fulfilled]: (state, action) => ({
+      ...state,
+      approvedList: action.payload.List
+    }),
+    [getCreateAccount.fulfilled]: (state, action) => ({
+      ...state,
+      craeteAccount: action.payload.List
+    }),
+    [getMembers.fulfilled]: (state, action) => ({
+      ...state,
+      members: action.payload.List
     })
   }
 });

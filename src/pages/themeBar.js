@@ -18,6 +18,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import CurrencyExchangeSharpIcon from '@mui/icons-material/CurrencyExchangeSharp';
 import PaymentsSharpIcon from '@mui/icons-material/PaymentsSharp';
+import LocalAtmSharpIcon from '@mui/icons-material/LocalAtmSharp';
 import Router from '../routes';
 
 const drawerWidth = 240;
@@ -154,14 +155,14 @@ function Themebar() {
           <Divider />
           <List sx={{ mt: 2 }}>
             <ListItemButton
-              to="/"
+              to="/dashboard"
               component={Link}
               role="button"
-              selected={location.pathname === '/'}>
+              selected={location.pathname === '/dashboard'}>
               <ListItemIcon>
                 <CurrencyExchangeSharpIcon />
               </ListItemIcon>
-              <ListItemText primary="Create Fund" />
+              <ListItemText primary="Funds" />
             </ListItemButton>
             <ListItemButton
               to="/auctions"
@@ -172,6 +173,16 @@ function Themebar() {
                 <PaymentsSharpIcon />
               </ListItemIcon>
               <ListItemText primary="Auctions" />
+            </ListItemButton>
+            <ListItemButton
+              to="/bidplacements"
+              component={Link}
+              role="button"
+              selected={location.pathname === '/bidplacements'}>
+              <ListItemIcon>
+                <LocalAtmSharpIcon />
+              </ListItemIcon>
+              <ListItemText primary="Bid Placements" />
             </ListItemButton>
           </List>
         </Drawer>

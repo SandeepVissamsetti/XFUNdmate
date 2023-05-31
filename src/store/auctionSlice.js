@@ -4,7 +4,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { showMessage } from './messageSlice';
 import { startLoading3, clearLoading3, clearLoading1, startLoading1 } from './loaderSlice';
-import { getAuctionsService, createFundService } from '../services/auctionsService';
+import {
+  getAuctionsService,
+  createFundService,
+  getAuctionsMenuService
+} from '../services/auctionsService';
 
 export const getAuctionsList = createAsyncThunk(
   'auctions/getAuctionsList',
@@ -17,7 +21,7 @@ export const getAuctionsList = createAsyncThunk(
       const response = await getAuctionsService(data);
       if (response.status) {
         dispatch(clearLoading3());
-        return { auctionsList: response.auction, count: response.length };
+        return { auctionsList: response.auctions, count: response.length };
       }
       dispatch(clearLoading3());
       if (response.error) {
@@ -71,10 +75,37 @@ export const createAuctionList = createAsyncThunk(
     }
   }
 );
+export const getAuctionMenuList = createAsyncThunk(
+  'auctions/getAuctionMenuList',
+  async (data, { dispatch }) => {
+    dispatch(startLoading3());
+    try {
+      const response = await getAuctionsMenuService(data);
+      if (response.status) {
+        dispatch(clearLoading3());
+        return { List: response.chit_funds };
+      }
+      dispatch(clearLoading3());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: [] };
+    } catch (error) {
+      dispatch(clearLoading3());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: [] };
+    }
+  }
+);
+
 const auctionsSlice = createSlice({
   name: 'auctions',
   initialState: {
     auctionsList: [],
+    auctionsMenuList: [],
     Count: 0
   },
   reducers: {},
@@ -88,6 +119,10 @@ const auctionsSlice = createSlice({
       ...state,
       auctionsList: action.payload.List,
       Count: action.payload.count
+    }),
+    [getAuctionMenuList.fulfilled]: (state, action) => ({
+      ...state,
+      auctionsMenuList: action.payload.List
     })
   }
 });
