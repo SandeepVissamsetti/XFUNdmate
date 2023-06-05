@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState } from 'react';
 import moment from 'moment';
 import Table from '@mui/material/Table';
+import { useNavigate } from 'react-router-dom';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -22,6 +23,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  FormHelperText,
   Button,
   Box,
   CircularProgress,
@@ -29,6 +31,7 @@ import {
   Avatar
 } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import Formsy from 'formsy-react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -38,19 +41,46 @@ import { getAuctionsList, createAuctionList, getAuctionMenuList } from '../store
 export default function AuctionsPage() {
   const dispatch = useDispatch();
   const [openAddDialog, setOpenAddDialog] = useState(false);
-
+  const auctionsID = useLocation();
+  const navigate = useNavigate();
   const [menu, setMenu] = useState('');
   const [openView, setOpenView] = useState(false);
   const [view, setView] = useState();
-
-  const tableDate = useSelector((auctions) => auctions.auctions.auctionsList);
   const auctionMenuList = useSelector((auctions) => auctions.auctions.auctionsMenuList);
+  // const [dropSelect, setDropSelect] = useState(
+  //   auctionsID?.state?.res?.id ? auctionsID?.state?.res?.id : auctionMenuList[0]?.id
+  // );
+  const [dropSelect, setDropSelect] = useState('');
+
+  const handleChangeDrop = (value) => {
+    setDropSelect(value);
+    setMenu(value);
+    dispatch(getAuctionsList(value));
+  };
+
+  const tableData = useSelector((auctions) => auctions.auctions.auctionsList);
   const loading1 = useSelector(({ loading }) => loading.loading1);
 
   useEffect(() => {
-    dispatch(getAuctionMenuList());
-    dispatch(getAuctionsList());
+    dispatch(getAuctionMenuList()).then((res) => {
+      if (res && res?.payload) {
+        // handleChangeDrop(
+        //   auctionsID?.state?.res?.id ? auctionsID?.state?.res?.id : res?.payload?.List[0]?.id
+        // );
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    if (auctionMenuList && auctionMenuList.length > 0) {
+      handleChangeDrop(
+        auctionsID?.state?.res?.id ? auctionsID?.state?.res?.id : auctionMenuList[0]?.id
+      );
+    }
+    return () => {
+      window.history.replaceState({}, document.title);
+    };
+  }, [auctionMenuList]);
 
   const handleChange = (event) => {
     setMenu(event.target.value);
@@ -96,30 +126,58 @@ export default function AuctionsPage() {
           <Typography variant="h6">Auctions</Typography>
         </Grid>
         <Grid item>
-          <Tooltip title="Add" arrow>
-            <IconButton
-              onClick={() => createFun()}
-              disableRipple
-              sx={{ bgcolor: 'green', color: '#fff' }}>
-              <AddSharpIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <Grid container direction="row" justifyContent="space-between" alignItems="baseline">
+            <Grid item>
+              <FormControl sx={{ minWidth: 120, pr: 1, pt: -1 }}>
+                <Select
+                  labelId="demo-simple-select-helper-label"
+                  id="demo-simple-select-helper"
+                  value={dropSelect}
+                  // value={8}
+                  size="small"
+                  onChange={(e) => handleChangeDrop(e.target.value)}>
+                  {auctionMenuList.map((res) => (
+                    <MenuItem value={res.id} key={res.id}>
+                      {res.fund_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>Select any fund</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Add" arrow>
+                <IconButton
+                  onClick={() => createFun()}
+                  disableRipple
+                  sx={{ bgcolor: 'green', color: '#fff' }}>
+                  <AddSharpIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
       <br />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table" size="small">
-          <TableHead>
+          <TableHead sx={{ whiteSpace: 'nowrap' }}>
             <TableRow>
               <TableCell>Fund Name</TableCell>
               <TableCell>Auction Start Date</TableCell>
               <TableCell>Auction End Date</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {tableDate?.map((row) => (
-              <Fragment key={row.id}>
+            {tableData?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  No Records Available
+                </TableCell>
+              </TableRow>
+            ) : (
+              tableData?.map((row) => (
                 <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCell component="th" scope="row">
                     {row?.chit_fund?.fund_name}
@@ -131,51 +189,57 @@ export default function AuctionsPage() {
                       : ''}
                   </TableCell>
                   <TableCell>
-                    <Avatar sx={{ bgcolor: 'green' }} onClick={() => handleViewOpen(row)}>
-                      <VisibilityIcon />
-                    </Avatar>
+                    <Stack direction="row" spacing={1} justifyContent="end">
+                      <Avatar
+                        sx={{ bgcolor: 'green', width: 34, height: 34 }}
+                        onClick={() => handleViewOpen(row)}>
+                        <VisibilityIcon />
+                      </Avatar>
+                      {!row?.is_done && (
+                        <Button
+                          variant="contained"
+                          color={'secondary'}
+                          size="small"
+                          onClick={() =>
+                            navigate('/bidplacements', {
+                              state: { row }
+                            })
+                          }>
+                          Bid
+                        </Button>
+                      )}
+                      {!row?.is_done ? (
+                        <Button
+                          variant="contained"
+                          color={'warning'}
+                          size="small"
+                          onClick={() =>
+                            navigate('/auctiondetails', {
+                              state: { row }
+                            })
+                          }>
+                          End
+                        </Button>
+                      ) : (
+                        row?.is_done && (
+                          <Button
+                            variant="contained"
+                            color={'secondary'}
+                            size="small"
+                            onClick={() =>
+                              navigate('/auctiondetails', {
+                                state: { row }
+                              })
+                            }>
+                            summary
+                          </Button>
+                        )
+                      )}
+                    </Stack>
                   </TableCell>
                 </TableRow>
-                {/* <TableRow>
-                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse
-                      in={dropdownId === row?.id ? true : false}
-                      timeout="auto"
-                      unmountOnExit>
-                      <Box sx={{ margin: 1 }}>
-                        <Typography variant="body1" gutterBottom component="div">
-                          Fund Details
-                        </Typography>
-                        <Table size="small" aria-label="purchases">
-                          <TableHead>
-                            <TableRow key={row.id} sx={{ whiteSpace: 'nowrap' }}>
-                              <TableCell>Fund Start Date</TableCell>
-                              <TableCell>Amount</TableCell>
-                              <TableCell>Commission Per %</TableCell>
-                              <TableCell align="right">Total Months</TableCell>
-                              <TableCell align="right">XRP Address</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            <TableRow key={row.id}>
-                              <TableCell component="th" scope="row">
-                                {moment(row?.chit_fund?.fund_start_date).format('DD-MM-YYYY')}
-                              </TableCell>
-                              <TableCell>{row?.chit_fund?.fund_amount}</TableCell>
-                              <TableCell>{row?.chit_fund?.commission_percentage}</TableCell>
-                              <TableCell align="right">{row?.chit_fund?.total_months}</TableCell>
-                              <TableCell align="right">
-                                xxxxxxxx{row?.chit_fund?.xrpl_address.slice(-6)}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </Box>
-                    </Collapse>
-                  </TableCell>
-                </TableRow> */}
-              </Fragment>
-            ))}
+              ))
+            )}
           </TableBody>
         </Table>
         <Dialog
@@ -236,6 +300,7 @@ export default function AuctionsPage() {
                   label="Auction End Date"
                   id="auction_end_date"
                   type="Date"
+                  required
                   name="auction_end_date"
                   variant="outlined"
                   fullWidth
@@ -352,9 +417,11 @@ export default function AuctionsPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      {view?.chit_fund?.auction_end_date
-                        ? moment(view?.chit_fund?.auction_end_date).format('DD.MM.YYYY HH:mm')
-                        : null}{' '}
+                      <Typography variant="subtitle2">
+                        {view?.auction_end_date
+                          ? moment(view?.auction_end_date).format('DD.MM.YYYY HH:mm')
+                          : null}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -368,32 +435,6 @@ export default function AuctionsPage() {
                         xx.....{view?.chit_fund?.xrpl_address.slice(-6)}
                       </Typography>
                     </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <Typography variant="subtitle2" color="grey">
-                        Status
-                      </Typography>
-                    </TableCell>
-                    {/* <TableCell>
-                      <Chip
-                        variant="soft"
-                        color={
-                          view && view?.chit_fund?.fund_approved === true ? 'primary' : 'error'
-                        }
-                        sx={{
-                          fontWeight: 'bold',
-                          pt: 0.1,
-                          px: view && view?.chit_fund?.fund_approved === true ? 0.7 : 0.1
-                        }}
-                        label={
-                          view && view?.chit_fund?.fund_approved === true
-                            ? 'Complete'
-                            : 'Incomplete'
-                        }
-                        size="small"
-                      />
-                    </TableCell> */}
                   </TableRow>
                 </TableBody>
               </Table>

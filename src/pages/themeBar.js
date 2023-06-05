@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link, useLocation } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,18 +16,20 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Grid from '@mui/material/Grid';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { List, ListItemButton, ListItemIcon, ListItemText, LinearProgress } from '@mui/material';
 import CurrencyExchangeSharpIcon from '@mui/icons-material/CurrencyExchangeSharp';
 import PaymentsSharpIcon from '@mui/icons-material/PaymentsSharp';
 import LocalAtmSharpIcon from '@mui/icons-material/LocalAtmSharp';
 import Router from '../routes';
+import Message from '../component/formsy/message/Message';
+import { ProgressBarStyle } from '../component/ProgressBar';
 
 const drawerWidth = 240;
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open'
 })(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  background: '#1dce6e',
+  background: 'black',
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen
@@ -48,7 +51,7 @@ const Drawer = styled(MuiDrawer, {
     position: 'relative',
     whiteSpace: 'nowrap',
     width: drawerWidth,
-    background: '#9ffcc980',
+    background: '#B2ABAC',
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen
@@ -91,6 +94,8 @@ const mdTheme = createTheme({
 function Themebar() {
   const location = useLocation();
   const [open, setOpen] = useState(true);
+  const loading3 = useSelector(({ loading }) => loading.loading3);
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
@@ -153,7 +158,7 @@ function Themebar() {
             </Grid>
           </Toolbar>
           <Divider />
-          <List sx={{ mt: 2 }}>
+          <List sx={{ mt: 2, color: 'black' }}>
             <ListItemButton
               to="/dashboard"
               component={Link}
@@ -178,7 +183,7 @@ function Themebar() {
               to="/bidplacements"
               component={Link}
               role="button"
-              selected={location.pathname === '/bidplacements'}>
+              selected={location.pathname === '/auctions/bidplacements'}>
               <ListItemIcon>
                 <LocalAtmSharpIcon />
               </ListItemIcon>
@@ -196,6 +201,13 @@ function Themebar() {
             overflow: 'auto'
           }}>
           <Toolbar />
+          <Message />
+          <ProgressBarStyle />
+          {loading3 ? (
+            <LinearProgress sx={{ mt: 0, mb: 2 }} color="warning" />
+          ) : (
+            <Typography sx={{ m: 2.5 }} />
+          )}
           <Router />
         </Box>
       </Box>

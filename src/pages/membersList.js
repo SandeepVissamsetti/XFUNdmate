@@ -12,7 +12,8 @@ import {
   Button,
   Toolbar,
   CircularProgress,
-  Stack,
+  // Stack,
+  TextField,
   Box
 } from '@mui/material';
 import Table from '@mui/material/Table';
@@ -30,40 +31,51 @@ import { createMemberList, getCreateAccount, getMembers } from '../store/createf
 
 function MembersList() {
   const members = useLocation();
-  const [fundId] = useState(members?.state?.res?.id);
-  console.log(members.state.res.id, ' members');
+  // const [fundId] = useState(members?.state?.res?.uuid);
   const dispatch = useDispatch();
   const [openDialog, setOpenDialog] = useState(false);
   const loading1 = useSelector(({ loading }) => loading.loading1);
+  const loading10 = useSelector(({ loading }) => loading.loading1);
   const xrplAccount = useSelector((account) => account.dashboard.craeteAccount);
+  const [xrpAddress, setXrpAddress] = useState(xrplAccount);
   const membersTable = useSelector((members) => members.dashboard.members);
-  console.log(membersTable, ' members');
-  console.log(xrplAccount, 'xrplAccount');
+
   useEffect(() => {
-    getMembers(fundId);
+    dispatch(getMembers(members?.state?.res?.uuid));
   }, []);
   const createFun = () => {
     setOpenDialog(true);
   };
-
   const closeFun = () => {
     setOpenDialog(false);
+    setXrpAddress(null);
   };
   const handleMemberSubmit = (data) => {
     const target = {
       ...data,
-      fund_id: members?.state?.res?.id
+      fund_id: members?.state?.res?.id,
+      xrpl_address: xrpAddress?.classicAddress,
+      xrpl_secret: xrpAddress?.seed
     };
-    dispatch(createMemberList(target)).then((res) => {
-      if (res && res?.payload) {
-        setOpenDialog(false);
-      } else {
-        setOpenDialog(true);
-      }
-    });
+    {
+      xrpAddress?.seed &&
+        dispatch(createMemberList(target)).then((res) => {
+          if (res && res?.payload) {
+            setOpenDialog(false);
+            setXrpAddress(null);
+            window.location.reload();
+          } else {
+            setOpenDialog(true);
+          }
+        });
+    }
   };
   const handelAccount = () => {
-    dispatch(getCreateAccount());
+    dispatch(getCreateAccount()).then((res) => {
+      if (res && res?.payload) {
+        setXrpAddress(res.payload.List);
+      }
+    });
   };
 
   return (
@@ -96,14 +108,22 @@ function MembersList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {members.state.res.members.map((row) => (
-              <TableRow key={row?.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell>{row?.name}</TableCell>
-                <TableCell align="right">{row?.email}</TableCell>
-                <TableCell align="right">{row?.phone}</TableCell>
-                <TableCell align="right">{row?.xrpl_address}</TableCell>
+            {membersTable.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  No Records Available
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              membersTable.map((row) => (
+                <TableRow key={row?.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell>{row?.name}</TableCell>
+                  <TableCell align="right">{row?.email}</TableCell>
+                  <TableCell align="right">{row?.phone}</TableCell>
+                  <TableCell align="right">{row?.xrpl_address}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -118,7 +138,7 @@ function MembersList() {
         }}>
         <Toolbar>
           <Typography variant="h6" color="Green">
-            Member Details
+            Add Member
           </Typography>
         </Toolbar>
         <Formsy onValidSubmit={handleMemberSubmit} name="registerForm">
@@ -128,6 +148,55 @@ function MembersList() {
               '& .react-tel-input.focused': { borderColor: 'green' },
               m: 2
             }}>
+            {/* {xrpAddress?.classicAddress && (
+              <>
+                <TextFieldFormsy
+                  label="Name"
+                  id="name"
+                  required
+                  name="name"
+                  variant="outlined"
+                  fullWidth
+                  type="text"
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  size="small"
+                />
+                <TextFieldFormsy
+                  label="Email"
+                  id="email"
+                  required
+                  type="email"
+                  name="email"
+                  validations={{
+                    isEmail: true
+                  }}
+                  validationErrors={{
+                    isEmail: 'This is not a valid email'
+                  }}
+                  variant="outlined"
+                  fullWidth
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  size="small"
+                />
+                <TextFieldFormsy
+                  label="Phone Number"
+                  id="phone"
+                  name="phone"
+                  variant="outlined"
+                  required
+                  fullWidth
+                  type="number"
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  size="small"
+                />
+              </>
+            )} */}
             <TextFieldFormsy
               label="Name"
               id="name"
@@ -173,44 +242,50 @@ function MembersList() {
               }}
               size="small"
             />
-            <Stack direction="row" spacing={10} marginLeft="2px" marginBottom="15px">
-              <TextFieldFormsy
-                label="XRP Address"
-                id="xrpl_address"
-                type="text"
-                name="xrpl_address"
-                required
-                variant="outlined"
-                placeholder="XRP Address"
-                fullWidth
-                InputLabelProps={{
-                  shrink: true
-                }}
-                size="small"
-              />
-              <Button
-                sx={{ mt: 1, mb: 1, px: 3 }}
-                type="submit"
-                variant="contained"
-                color="success"
-                aria-label="Register"
-                onClick={handelAccount}
-                style={{ textTransform: 'capitalize', fontSize: '16px' }}>
-                {loading1 ? <CircularProgress size={24} color="inherit" /> : 'create'}
-              </Button>
-            </Stack>
-
-            <Grid container direction="row" justifyContent="space-between" alignItems="baseline">
+            <TextField
+              id="demo-simple-select-helper-label"
+              label="Xrpl Address"
+              variant="outlined"
+              fullWidth
+              value={xrpAddress?.classicAddress ? xrpAddress?.classicAddress : ''}
+              // placeholder={xrpAddress?.classicAddress}
+              // defaultValue={xrpAddress?.classicAddress}
+              // inputProps={{ readOnly: true }}
+              disabled
+              size="small"
+              InputLabelProps={{
+                shrink: true
+              }}
+            />
+            <Grid
+              container
+              direction="row"
+              justifyContent="space-between"
+              alignItems="baseline"
+              padding={1}>
               <Grid item>
-                <Button
-                  sx={{ mt: 1, mb: 1, px: 3 }}
-                  type="submit"
-                  variant="contained"
-                  color="success"
-                  aria-label="Register"
-                  style={{ textTransform: 'capitalize', fontSize: '16px' }}>
-                  {loading1 ? <CircularProgress size={24} color="inherit" /> : 'Save'}
-                </Button>
+                {!xrpAddress?.classicAddress ? (
+                  <Button
+                    sx={{ mt: 1, mb: 1, px: 3 }}
+                    type="submit"
+                    variant="contained"
+                    color="success"
+                    aria-label="Register"
+                    onClick={handelAccount}
+                    style={{ textTransform: 'capitalize', fontSize: '16px' }}>
+                    {loading10 ? <CircularProgress size={24} color="inherit" /> : 'Get Xrp Address'}
+                  </Button>
+                ) : (
+                  <Button
+                    sx={{ mt: 1, mb: 1, px: 3 }}
+                    type="submit"
+                    variant="contained"
+                    color="success"
+                    aria-label="Register"
+                    style={{ textTransform: 'capitalize', fontSize: '16px' }}>
+                    {loading1 ? <CircularProgress size={24} color="inherit" /> : 'Save'}
+                  </Button>
+                )}
               </Grid>
               <Grid item>
                 <Button

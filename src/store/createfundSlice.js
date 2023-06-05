@@ -86,8 +86,6 @@ export const createMemberList = createAsyncThunk(
   async (data, { dispatch, getState }) => {
     const state = getState();
     const { memberList } = state.dashboard;
-    const { dashboardCount } = state.dashboard;
-
     dispatch(startLoading1());
     try {
       const response = await createMemberService(data);
@@ -100,9 +98,7 @@ export const createMemberList = createAsyncThunk(
           })
         );
         return {
-          List: [{ ...response.member }, ...memberList],
-          count: Number(dashboardCount) + 1,
-          response
+          List: [{ ...response.member }, ...memberList]
         };
       }
       dispatch(clearLoading1());
@@ -125,7 +121,7 @@ export const createApproveMemberList = createAsyncThunk(
   async (data, { dispatch, getState }) => {
     const state = getState();
     const { dashboardList } = state.dashboard;
-    const { dashboardCount } = state.dashboard;
+    const { Count } = state.dashboard;
 
     dispatch(startLoading1());
     try {
@@ -140,7 +136,7 @@ export const createApproveMemberList = createAsyncThunk(
         );
         return {
           List: [{ ...response }, ...dashboardList],
-          count: Number(dashboardCount) + 1,
+          count: Number(Count) + 1,
           response
         };
       }
@@ -187,15 +183,14 @@ export const getApprovedMenuList = createAsyncThunk(
 export const getCreateAccount = createAsyncThunk(
   'dashboard/getCreateAccount',
   async (data, { dispatch }) => {
-    dispatch(startLoading3());
+    dispatch(startLoading1());
     try {
       const response = await createAccountMemberService(data);
-      console.log(response, 'Account created successfully');
       if (response.status) {
-        dispatch(clearLoading3());
+        dispatch(clearLoading1());
         return { List: response.account };
       }
-      dispatch(clearLoading3());
+      dispatch(clearLoading1());
       if (response.error) {
         response.error.message &&
           dispatch(showMessage({ message: response.error.message, variant: 'error' }));
@@ -204,7 +199,7 @@ export const getCreateAccount = createAsyncThunk(
       }
       return { List: [] };
     } catch (error) {
-      dispatch(clearLoading3());
+      dispatch(clearLoading1());
       error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
       return { List: [] };
     }
@@ -219,10 +214,9 @@ export const getMembers = createAsyncThunk(
     dispatch(startLoading3());
     try {
       const response = await getMembersService(data);
-      console.log(response);
       if (response.status) {
         dispatch(clearLoading3());
-        return { List: response, count: response.length };
+        return { List: response.fund_members, count: response.length, response };
       }
       dispatch(clearLoading3());
       if (response.error) {
@@ -266,10 +260,10 @@ const dashboardSlice = createSlice({
       memberList: action.payload.List,
       Count: action.payload.count
     }),
-    [createApproveMemberList.fulfilled]: (state, action) => ({
-      ...state,
-      dashboardList: action.payload.List
-    }),
+    // [createApproveMemberList.fulfilled]: (state, action) => ({
+    //   ...state,
+    //   dashboardList: action.payload.List
+    // }),
     [getApprovedMenuList.fulfilled]: (state, action) => ({
       ...state,
       approvedList: action.payload.List

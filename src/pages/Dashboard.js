@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { CssBaseline } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -49,10 +49,28 @@ const Dashboard = () => {
 
   const rows = [
     {
+      id: 'action',
+      numeric: true,
+      disablePadding: false,
+      label: 'Actions'
+    },
+    {
       id: 'fund_name',
       numeric: true,
       disablePadding: false,
       label: 'Fund Name'
+    },
+    {
+      id: 'fund_balance',
+      numeric: true,
+      disablePadding: false,
+      label: 'Fund Balance'
+    },
+    {
+      id: 'total_members',
+      numeric: true,
+      disablePadding: false,
+      label: 'Total Members'
     },
     {
       id: 'fund_amount',
@@ -67,40 +85,16 @@ const Dashboard = () => {
       label: 'Total Months'
     },
     {
-      id: 'commission_percentage',
-      numeric: true,
-      disablePadding: false,
-      label: 'Commission Per%'
-    },
-    {
-      id: 'total_members',
-      numeric: true,
-      disablePadding: false,
-      label: 'Total Members'
-    },
-    {
-      id: 'min_auction_amount',
-      numeric: true,
-      disablePadding: false,
-      label: 'Min Auction Amount'
-    },
-    {
       id: 'fund_start_date',
       numeric: true,
       disablePadding: false,
       label: 'Fund Start Date'
     },
     {
-      id: 'actions',
+      id: 'members',
       numeric: true,
       disablePadding: false,
       label: 'Members'
-    },
-    {
-      id: 'action',
-      numeric: true,
-      disablePadding: false,
-      label: 'Actions'
     }
   ];
 
@@ -126,7 +120,11 @@ const Dashboard = () => {
     });
   };
   const handelApprove = (data) => {
-    dispatch(createApproveMemberList({ fund_id: data }));
+    dispatch(createApproveMemberList({ fund_id: data })).then((res) => {
+      if (res && res?.payload) {
+        window.location.reload();
+      }
+    });
   };
 
   return (
@@ -158,67 +156,81 @@ const Dashboard = () => {
               <TableRow>
                 {rows?.map((row) => (
                   <TableCell key={row.id} align="center" sx={{ whiteSpace: 'nowrap' }}>
-                    {row.label}
+                    {row?.label}
                   </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {tableData?.map((res) => (
-                <Fragment key={res.id}>
-                  <TableRow
-                    key={res.id}
-                    sx={{
-                      '&:last-child td, &:last-child th': { border: 0 },
-                      '&:nth-of-type(odd)': {
-                        backgroundColor: 'success'
-                      },
-                      whiteSpace: 'nowrap'
-                    }}>
-                    <TableCell component="th" scope="row">
-                      <Typography>{res.fund_name}</Typography>
-                    </TableCell>
-                    <TableCell>{res.fund_amount}</TableCell>
-                    <TableCell>{res.total_months}</TableCell>
-                    <TableCell>{res.commission_percentage}</TableCell>
-                    <TableCell>{res.total_members}</TableCell>
-                    <TableCell>{res.min_auction_amount}</TableCell>
-                    <TableCell>{moment(res?.fund_start_date).format('DD-MM-YYYY')}</TableCell>
-                    <TableCell>
-                      <GroupAddIcon
-                        onClick={() =>
-                          navigate('members', {
-                            state: { res }
-                          })
-                        }
-                      />
-                      {/* <Link to="/members" state={res}>
-                        <GroupAddIcon />
-                      </Link> */}
-                    </TableCell>
-                    <TableCell align="center">
-                      {/* res.fund_approved ? */}
-                      {res?.total_members <= res?.members?.length ? (
-                        res.fund_approved ? (
-                          <Link to="/auctions">
-                            <Button variant="contained" color={'secondary'} size="small">
+              {tableData?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    No Records Available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tableData?.map((res) => (
+                  <Fragment key={res.id}>
+                    <TableRow
+                      key={res.id}
+                      sx={{
+                        '&:last-child td, &:last-child th': { border: 0 },
+                        '&:nth-of-type(odd)': {
+                          backgroundColor: 'success'
+                        },
+                        whiteSpace: 'nowrap'
+                      }}>
+                      <TableCell align="center">
+                        {res?.total_members <= res?.members?.length ? (
+                          res.fund_approved ? (
+                            <Button
+                              variant="contained"
+                              color={'secondary'}
+                              size="small"
+                              onClick={() =>
+                                navigate('auctions', {
+                                  state: { res }
+                                })
+                              }>
                               Auction
                             </Button>
-                          </Link>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            color={'primary'}
-                            size="small"
-                            onClick={() => handelApprove(res?.id)}>
-                            {loading1 ? <CircularProgress size={24} color="inherit" /> : 'Approve'}
-                          </Button>
-                        )
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
-                </Fragment>
-              ))}
+                          ) : (
+                            <Button
+                              variant="contained"
+                              color={'primary'}
+                              size="small"
+                              onClick={() => handelApprove(res?.id)}>
+                              {loading1 ? (
+                                <CircularProgress size={24} color="inherit" />
+                              ) : (
+                                'Approve'
+                              )}
+                            </Button>
+                          )
+                        ) : null}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        <Typography>{res.fund_name}</Typography>
+                      </TableCell>
+                      <TableCell>0</TableCell>
+                      <TableCell>{res.total_members}</TableCell>
+                      <TableCell>{res.fund_amount}</TableCell>
+                      <TableCell>{res.total_months}</TableCell>
+                      <TableCell>{moment(res?.fund_start_date).format('DD-MM-YYYY')}</TableCell>
+                      <TableCell>
+                        <GroupAddIcon
+                          cursor="pointer"
+                          onClick={() =>
+                            navigate('members', {
+                              state: { res }
+                            })
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  </Fragment>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
