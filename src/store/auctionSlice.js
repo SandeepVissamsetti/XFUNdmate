@@ -7,7 +7,9 @@ import { startLoading3, clearLoading3, clearLoading1, startLoading1 } from './lo
 import {
   getAuctionsService,
   createFundService,
-  getAuctionsMenuService
+  getAuctionsMenuService,
+  getAuctionDetailsService,
+  getAuctionSummaryService
 } from '../services/auctionsService';
 
 export const getAuctionsList = createAsyncThunk(
@@ -100,12 +102,67 @@ export const getAuctionMenuList = createAsyncThunk(
     }
   }
 );
+export const getAuctionDetailsList = createAsyncThunk(
+  'auctions/getAuctionDetailsList',
+  async (data, { dispatch }) => {
+    dispatch(startLoading3());
+    try {
+      const response = await getAuctionDetailsService(data);
+      if (response.status) {
+        dispatch(clearLoading3());
+        return { List: response.auction_summary };
+      }
+      dispatch(clearLoading3());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: null };
+    } catch (error) {
+      dispatch(clearLoading3());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: null };
+    }
+  }
+);
+export const getAuctionSummary = createAsyncThunk(
+  'auctions/getAuctionSummary',
+  async (data, { dispatch, getState }) => {
+    const state = getState();
+    const { Count, auctionSummary } = state.auctions.auctionSummary;
+
+    dispatch(startLoading3());
+    try {
+      const response = await getAuctionSummaryService(data);
+      if (response.status) {
+        dispatch(clearLoading3());
+        return { List: response.auction_summary, count: response.length };
+      }
+      dispatch(clearLoading3());
+      if (response.error) {
+        response.error.message &&
+          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      } else {
+        response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+      }
+      return { List: auctionSummary, count: Count };
+    } catch (error) {
+      dispatch(clearLoading3());
+      error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+      return { List: auctionSummary, count: Count };
+    }
+  }
+);
 
 const auctionsSlice = createSlice({
   name: 'auctions',
   initialState: {
     auctionsList: [],
     auctionsMenuList: [],
+    auctionDetails: [],
+    auctionSummary: [],
     Count: 0
   },
   reducers: {},
@@ -123,6 +180,16 @@ const auctionsSlice = createSlice({
     [getAuctionMenuList.fulfilled]: (state, action) => ({
       ...state,
       auctionsMenuList: action.payload.List
+    }),
+    [getAuctionDetailsList.fulfilled]: (state, action) => ({
+      ...state,
+      auctionDetails: action.payload.List,
+      Count: action.payload.count
+    }),
+    [getAuctionSummary.fulfilled]: (state, action) => ({
+      ...state,
+      auctionSummary: action.payload.List,
+      Count: action.payload.count
     })
   }
 });

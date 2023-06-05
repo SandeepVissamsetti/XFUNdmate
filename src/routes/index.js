@@ -3,6 +3,7 @@ import AuctionsPage from '../pages/AuctionsPage';
 import Dashboard from '../pages/Dashboard';
 import BidPlacements from '../pages/BidPlacements';
 import MembersList from '../pages/membersList';
+import Auctiondetails from '../pages/AuctionDetails';
 
 export default function Router() {
   return useRoutes([
@@ -19,27 +20,10 @@ export default function Router() {
     {
       path: '/bidplacements',
       element: <BidPlacements />
+    },
+    {
+      path: '/auctiondetails',
+      element: <Auctiondetails />
     }
   ]);
 }
-// import { useRoutes, Navigate } from 'react-router-dom';
-// import AuctionsPage from '../pages/AuctionsPage';
-// import Dashboard from '../pages/Dashboard';
-// import BidPlacements from '../pages/BidPlacements';
-// import MembersList from '../pages/membersList';
-// import { PATH_DASHBOARD } from './paths';
-// export default function Router() {
-//   return useRoutes([
-//     { element: <Navigate to={PATH_DASHBOARD} replace />, index: true },
-//     { path: '/dashboard', element: <Dashboard /> },
-//     { path: 'dash/:uuid', element: <MembersList /> },
-//     {
-//       path: '/auctions',
-//       element: <AuctionsPage />
-//     },
-//     {
-//       path: '/bidplacements',
-//       element: <BidPlacements />
-//     }
-//   ]);
-// }

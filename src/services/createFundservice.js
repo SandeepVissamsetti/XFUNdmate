@@ -24,10 +24,8 @@ export const createDashboardService = (data) =>
     .then((response) => response.data)
     .catch(handleResponse);
 export const createMemberService = (data) =>
-  axiosConfig
-    .post(`/fund/add-member`, data)
-    .then((response) => response.data)
-    .catch(handleResponse);
+  axiosConfig.post(`/fund/add-member`, data).then((response) => response.data);
+// .catch(handleResponse);
 export const approveMemberService = (data) =>
   axiosConfig
     .post(`/fund/approve`, data)
@@ -50,6 +48,6 @@ export const createAccountMemberService = (data) =>
     .catch(handleResponse);
 export const getMembersService = (data) =>
   axiosConfig
-    .post(`/fund/members/menu/${data}`)
+    .get(`/fund/members/list/${data}`)
     .then((response) => response.data)
     .catch(handleResponse);

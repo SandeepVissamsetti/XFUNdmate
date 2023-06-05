@@ -7,7 +7,8 @@ import { startLoading3, clearLoading3, startLoading1, clearLoading1 } from './lo
 import {
   getMemberMenuService,
   getAuctionMenuListService,
-  createBidService
+  createBidService,
+  getBidListService
 } from '../services/bidService';
 
 export const getMemberMenuList = createAsyncThunk(
@@ -35,6 +36,28 @@ export const getMemberMenuList = createAsyncThunk(
     }
   }
 );
+export const getBidList = createAsyncThunk('bid/getBidList', async (data, { dispatch }) => {
+  dispatch(startLoading3());
+  try {
+    const response = await getBidListService(data);
+    if (response.status) {
+      dispatch(clearLoading3());
+      return { List: response.bids, ChitFund: response.chit_fund };
+    }
+    dispatch(clearLoading3());
+    if (response.error) {
+      response.error.message &&
+        dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+    } else {
+      response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
+    }
+    return { List: [] };
+  } catch (error) {
+    dispatch(clearLoading3());
+    error.message && dispatch(showMessage({ message: error.message, variant: 'error' }));
+    return { List: [] };
+  }
+});
 export const getAuctionMenuList = createAsyncThunk(
   'bid/getAuctionMenuList',
   async (data, { dispatch }) => {
@@ -69,7 +92,6 @@ export const createBidList = createAsyncThunk(
     dispatch(startLoading1());
     try {
       const response = await createBidService(data);
-      console.log(response, 'bid craete redux');
       if (response?.status) {
         dispatch(clearLoading1());
         dispatch(
@@ -79,14 +101,12 @@ export const createBidList = createAsyncThunk(
           })
         );
         return {
-          List: [{ ...response }, ...bidList],
-          response
+          List: [{ ...response.bid }, ...bidList]
         };
       }
       dispatch(clearLoading1());
-      if (response.error) {
-        response.error.message &&
-          dispatch(showMessage({ message: response.error.message, variant: 'error' }));
+      if (response) {
+        response && dispatch(showMessage({ message: response, variant: 'error' }));
       } else {
         response.message && dispatch(showMessage({ message: response.message, variant: 'error' }));
       }
@@ -120,6 +140,11 @@ const bidSlice = createSlice({
     [createBidList.fulfilled]: (state, action) => ({
       ...state,
       bidList: action.payload.List
+    }),
+    [getBidList.fulfilled]: (state, action) => ({
+      ...state,
+      bidList: action.payload.List,
+      ChitFund: action.payload.ChitFund
     })
   }
 });

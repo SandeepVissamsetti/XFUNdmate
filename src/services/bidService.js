@@ -18,16 +18,19 @@ export const getMemberMenuService = (data) =>
     .get(`/fund/members/menu/${data}`)
     .then((response) => response.data)
     .catch(handleResponse);
+export const getBidListService = (data) =>
+  axiosConfig
+    .get(`/fund/auction/bid/list?fund_id=${data}`)
+    .then((response) => response.data)
+    .catch(handleResponse);
 export const getAuctionMenuListService = (data) =>
   axiosConfig
     .get(`/fund/auction/menu/${data}`)
     .then((response) => response.data)
     .catch(handleResponse);
 export const createBidService = (data) =>
-  axiosConfig
-    .post(`/fund/auction/bid`, data)
-    .then((response) => response.data)
-    .catch(handleResponse);
+  axiosConfig.post(`/fund/auction/bid`, data).then((response) => response.data);
+// .catch(handleResponse);
 // export const getAuctionsMenuService = (data) =>
 //   axiosConfig
 //     .get(`/fund/approved/menu`, data)
