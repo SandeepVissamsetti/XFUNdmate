@@ -60,7 +60,7 @@ export default function auctiondetails() {
           </Grid>
           <br />
           <TableContainer direction="row" justifyContent="space-between" alignItems="baseline">
-            <Paper sx={{ width: 500 }}>
+            <Paper>
               <Table
                 aria-label="simple table"
                 size="small"
@@ -108,7 +108,7 @@ export default function auctiondetails() {
                   <TableRow>
                     <TableCell>
                       <Typography variant="subtitle2" color="grey">
-                        Auction Amount
+                        Winner Bid Amount
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -118,11 +118,11 @@ export default function auctiondetails() {
                   <TableRow>
                     <TableCell>
                       <Typography variant="subtitle2" color="grey">
-                        Net Amount
+                        Winner Net Amount
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="subtitle2">{summaryData?.total_fund_amount}</Typography>
+                      <Typography variant="subtitle2">{summaryData?.winner_amount}</Typography>
                     </TableCell>
                   </TableRow>
                   <TableRow>
