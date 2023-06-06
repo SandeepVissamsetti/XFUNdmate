@@ -1,7 +1,6 @@
 {
   "name": "xfundmate",
   "version": "0.1.0",
-  "homepage": "https://SarankumarE.github.io/XFUNdmate",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.0",

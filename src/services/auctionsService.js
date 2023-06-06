@@ -28,3 +28,6 @@ export const getAuctionDetailsService = (data) =>
 export const getAuctionSummaryService = (data) =>
   axiosConfig.get(`/fund/auction/summary/${data}`).then((response) => response.data);
 // .catch(handleResponse);
+export const getAuctionSettleService = (data) =>
+  axiosConfig.get(`/fund/auction/settle/${data}`).then((response) => response.data);
+// .catch(handleResponse);

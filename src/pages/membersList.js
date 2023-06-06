@@ -28,6 +28,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Formsy from 'formsy-react';
 import { TextFieldFormsy } from '../component/formsy';
 import { createMemberList, getCreateAccount, getMembers } from '../store/createfundSlice';
+import GetBalance from './GetBalance';
 
 function MembersList() {
   const members = useLocation();
@@ -105,6 +106,7 @@ function MembersList() {
               <TableCell align="right">Email</TableCell>
               <TableCell align="right">Phone</TableCell>
               <TableCell align="right">XRP Address</TableCell>
+              <TableCell align="right">Balance</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -120,7 +122,10 @@ function MembersList() {
                   <TableCell>{row?.name}</TableCell>
                   <TableCell align="right">{row?.email}</TableCell>
                   <TableCell align="right">{row?.phone}</TableCell>
-                  <TableCell align="right">{row?.xrpl_address}</TableCell>
+                  <TableCell align="right">xxxxx...{row?.xrpl_address.slice(-6)}</TableCell>
+                  <TableCell align="right">
+                    <GetBalance address={row?.xrpl_address} />
+                  </TableCell>
                 </TableRow>
               ))
             )}

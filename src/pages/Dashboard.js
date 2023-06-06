@@ -36,6 +36,7 @@ import {
   createDashboardList,
   createApproveMemberList
 } from '../store/createfundSlice';
+import GetBalance from './GetBalance';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -212,7 +213,9 @@ const Dashboard = () => {
                       <TableCell component="th" scope="row">
                         <Typography>{res.fund_name}</Typography>
                       </TableCell>
-                      <TableCell>0</TableCell>
+                      <TableCell>
+                        <GetBalance address={res.xrpl_address} />
+                      </TableCell>
                       <TableCell>{res.total_members}</TableCell>
                       <TableCell>{res.fund_amount}</TableCell>
                       <TableCell>{res.total_months}</TableCell>

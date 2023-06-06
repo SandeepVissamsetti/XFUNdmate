@@ -51,3 +51,9 @@ export const getMembersService = (data) =>
     .get(`/fund/members/list/${data}`)
     .then((response) => response.data)
     .catch(handleResponse);
+
+export const getXRPLBalanceService = (data) =>
+  axiosConfig
+    .post(`/xrpl/get-balance`, data)
+    .then((response) => response.data)
+    .catch(handleResponse);
